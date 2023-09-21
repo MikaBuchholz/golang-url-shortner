@@ -4,9 +4,12 @@ go 1.20
 
 require github.com/arturfil/coffee-api v0.0.0-20230702231926-c7f714722199
 
+require github.com/cespare/xxhash/v2 v2.1.2 // indirect
+
 require (
 	github.com/go-chi/chi/v5 v5.0.8 // indirect
 	github.com/go-chi/cors v1.2.1
+	github.com/go-chi/httprate v0.7.4
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.1 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

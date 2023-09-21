@@ -57,7 +57,7 @@ Example GET request
 
 ## TODO
 
-- Update view count on **GET** request for any shortened url
+- ~~Update view count on **GET** request for any shortened url~~
 
 - Deploy to google cloud / any service
 

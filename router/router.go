@@ -2,12 +2,14 @@ package router
 
 import (
 	"net/http"
+	"time"
 
 	"shortner/controllers"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/go-chi/httprate"
 )
 
 const BASE_API_URL = "api"
@@ -36,6 +38,7 @@ func (router_cntrl *RouterController) Routes() http.Handler {
 		MaxAge:           300,
 	}))
 
+	router.Use(httprate.LimitByIP(100, 1*time.Minute))
 	router.Get(BASE_ROUTE+"/url/{id}", router_cntrl.Controller.HandleGetUrl)
 	router.Post(BASE_ROUTE+"/url/new", router_cntrl.Controller.HandleNewUrl)
 

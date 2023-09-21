@@ -10,12 +10,8 @@ import (
 )
 
 type Url struct {
-	id            string
-	url           string
-	shortened_url string
-	views         int32
-	created_at    time.Time
-	updated_at    time.Time
+	url   string
+	views int32
 }
 
 type UrlShortnerService struct {
@@ -65,19 +61,28 @@ func (svc *UrlShortnerService) GetUrl(ct context.Context, data GetUrlDTO) (*GetU
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
 	defer cancel()
 
-	query := "SELECT * FROM urls WHERE shortened_url = $1"
+	query := "SELECT url, views FROM urls WHERE shortened_url = $1"
 	row := svc.db.QueryRowContext(ctx, query, data.ShortenedUrl)
 
 	dest := Url{}
 
-	err := row.Scan(&dest.id, &dest.url, &dest.shortened_url, &dest.views, &dest.created_at, &dest.updated_at)
+	err := row.Scan(&dest.url, &dest.views)
 
 	if err != nil {
 		return nil, err
 	}
 
+	update_views_query := `
+	UPDATE urls SET views = $1, updated_at = $2
+	WHERE shortened_url = $3
+`
+
+	svc.db.ExecContext(
+		ctx,
+		update_views_query, dest.views+1, time.Now(), data.ShortenedUrl)
+
 	return &GetUrlResponseDTO{
 		TrueUrl:   dest.url,
-		ViewCount: dest.views,
+		ViewCount: dest.views + 1,
 	}, nil
 }

@@ -2,13 +2,15 @@ package main
 
 import (
 	"fmt"
+
 	"log"
 	"net/http"
-	"os"
 	"shortner/controllers"
 	"shortner/db"
 	"shortner/router"
 	"shortner/services"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -17,21 +19,27 @@ type Config struct {
 
 type Application struct {
 	Config Config
+	Router *router.RouterController
 }
 
-func (app *Application) Serve(router_cntrl *router.RouterController) error {
-
+func (app *Application) Serve() error {
 	srv := &http.Server{
 		Addr:    fmt.Sprintf(":%s", app.Config.Port),
-		Handler: router_cntrl.Routes(),
+		Handler: app.Router.Routes(),
 	}
 
 	return srv.ListenAndServe()
 }
 
 func main() {
-	port := os.Getenv("PORT")
-	dsn := os.Getenv("DSN")
+	envFile, err := godotenv.Read(".env")
+
+	if err != nil {
+		log.Fatal("Could not find .env file")
+	}
+
+	port := envFile["PORT"]
+	dsn := envFile["DSN"]
 
 	dbConn, err := db.ConnectPostgres(dsn)
 
@@ -44,11 +52,11 @@ func main() {
 	router_cntrl := router.NewRouterController(controller)
 
 	config := Config{Port: port}
-	app := Application{Config: config}
+	app := Application{Config: config, Router: router_cntrl}
 
 	defer dbConn.DB.Close()
 
-	err = app.Serve(router_cntrl)
+	err = app.Serve()
 
 	if err != nil {
 		log.Fatal("Failed to serve app")

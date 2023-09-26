@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"shortner/controllers"
+	"shortner/util"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
@@ -28,6 +29,7 @@ func NewRouterController(cntrl controllers.Controller) *RouterController {
 
 func (router_cntrl *RouterController) Routes() http.Handler {
 	router := chi.NewRouter()
+
 	router.Use(middleware.Recoverer)
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"http://*", "https://*"},
@@ -42,8 +44,12 @@ func (router_cntrl *RouterController) Routes() http.Handler {
 	router.Get(BASE_ROUTE+"/url/{id}", router_cntrl.Controller.HandleGetUrl)
 	router.Post(BASE_ROUTE+"/url/new", router_cntrl.Controller.HandleNewUrl)
 
-	router.Get("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("works"))
+	router.Get("/health", func(w http.ResponseWriter, r *http.Request) {
+		http_util.RespondWithJSON(w, http_util.OK(struct{ Status string }{Status: "OK"}))
+	})
+
+	router.Get("/", func(w http.ResponseWriter, r *http.Request) {
+		http_util.RespondWithJSON(w, http_util.OK("<3"))
 	})
 
 	return router

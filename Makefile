@@ -1,9 +1,4 @@
-PORT=8080
-DB_DOCKER_CONTAINER=url_shortner
-BINARY_NAME=urlshortner
-SUPER_USER=postgres
-SUPER_PASSWORD=secret
-DSN="host=localhost port=5432 user=${SUPER_USER} password=${SUPER_PASSWORD} dbname=${SUPER_USER} sslmode=disable timezone=UTC connect_timeout=5"
+include .env
 
 postgres:
 	docker run --name ${DB_DOCKER_CONTAINER} -p 5432:5432 -e POSTGRES_USER=${SUPER_USER} -e POSTGRES_PASSWORD=${SUPER_PASSWORD} -d postgres:12-alpine
@@ -18,14 +13,13 @@ create_migrations:
 	sqlx migrate add -r init 
 
 migrate-up:
-	sqlx migrate run --database-url "postgres://${SUPER_USER}:${SUPER_PASSWORD}@localhost:5432/${SUPER_USER}?sslmode=disable"
+	sqlx migrate run --database-url "postgres://${SUPER_USER}:${SUPER_PASSWORD}@${HOST}:5432/${SUPER_USER}?sslmode=disable"
 
 migrate-down:
-	sqlx migrate revert --database-url "postgres://${SUPER_USER}:${SUPER_PASSWORD}@localhost:5432/${SUPER_USER}?sslmode=disable"
+	sqlx migrate revert --database-url "postgres://${SUPER_USER}:${SUPER_PASSWORD}@${HOST}:5432/${SUPER_USER}?sslmode=disable"
 
 createdb:
 	docker exec -it ${DB_DOCKER_CONTAINER} createdb --user=${SUPER_USER} --owner=${SUPER_USER} urldb
-
 
 stop_containers:
 	@echo "Stopping other docker containers"
@@ -43,10 +37,21 @@ build:
 
 run: build stop_containers start-docker
 	@echo "Starting api"
-	@env PORT=${PORT} DSN=${DSN} ./${BINARY_NAME} &
+	./${BINARY_NAME}
 	@echo "api started!"
 
 stop:
 	@echo "Stopping backend"
 	@-pkill -SIGTERM -f "./${BINARY_NAME}"
 	@echo "Stopped backen
+
+# Not yet ready for use - Dockerfile not completed 
+run-server-image:
+	docker run shortner
+
+build-server-image:
+	docker build --tag shortner .
+
+start-project: run
+	cd frontend && npm i && npm run dev
+#

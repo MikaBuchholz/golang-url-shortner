@@ -7,23 +7,42 @@ This service offers shortning of links and getting back the url of said shortene
 Prepare
 
 Install
-
+    Docker / Docker-Desktop
     Make (if not present)
     sqlx-cli
+    Go
 
-Run
+# All-In-One setup
 
-    make postgres
-    make create_migrations
-    make migrate-up
-    make createdb
-    make run
+This will set everything up and run the server / postgres DB
+
+    make bootstrap
+
+# Individual commands
+
+Build the server image
+
+    make build-server-image
+
+Run the server image
+
+    make run-server-image
+
+Verify the server and postgres DB are working properly
+
+    make mock-post
+
+Expected return is
+
+    {"id":"d4c9d9","view_count":0}
+
+- Anything else is wrong
 
 ## How to use
 
 ### API ENDPOINTS
 
-- server is running on http://localhost:8080 by default
+- server is running on <http://localhost:8080> by default
 
 ### Create new Shortened URL
 
